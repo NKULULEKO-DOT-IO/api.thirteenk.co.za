@@ -1,20 +1,18 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, BeforeValidator
 from bson import ObjectId
 
 
-class PyObjectId(str):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+# Modern Pydantic v2 approach
+def validate_object_id(v):
+    if not ObjectId.is_valid(v):
+        raise ValueError("Invalid ObjectId")
+    return str(v)
 
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return str(v)
+
+PyObjectId = Annotated[str, BeforeValidator(validate_object_id)]
 
 
 class Image(BaseModel):
@@ -33,7 +31,7 @@ class Image(BaseModel):
     is_featured: bool = False
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True  # new in v2 (replaces allow_population_by_field_name)
         arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str

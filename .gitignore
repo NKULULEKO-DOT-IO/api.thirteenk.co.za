@@ -176,3 +176,48 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gcloud run deploy tredicikapi-uat \
+  --image gcr.io/tredicik/tredicikapi-uat:latest \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars="DATABASE_URL=YOUR_PRODUCTION_DB_URL,ANTHROPIC_API_KEY=YOUR_API_KEY,ANTHROPIC_MODEL=claude-3-5-haiku-latest,DEBUG=False,SECRET_KEY=YOUR_SECRET_KEY"
+
+
+
+
+
+
+
+# Build the Docker image
+docker build -t gcr.io/tredicik/tredicikapi-uat:latest .
+
+# Push the image to Google Container Registry
+docker push gcr.io/tredicik/tredicikapi-uat:latest
+
+
+
+
+
+
+
+
+
+
+
+

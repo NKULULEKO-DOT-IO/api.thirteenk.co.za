@@ -1,10 +1,12 @@
 import os
 import uuid
+import json
 from io import BytesIO
 from typing import Dict, Any, Optional
 
 from fastapi import UploadFile
 from google.cloud import storage
+from google.oauth2 import service_account
 from PIL import Image
 
 from app.core.config import get_settings
@@ -18,17 +20,26 @@ class StorageService:
     """Service for handling Google Cloud Storage operations."""
 
     def __init__(self):
-        """Initialize the storage client and buckets."""
+        """Initialize the storage client and buckets using JSON credentials."""
         try:
-            # Set credentials file path
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.GCS_CREDENTIALS_FILE
+            # Get credentials JSON content
+            credentials_info = json.loads(settings.GCS_CREDENTIALS_JSON)
 
-            # Initialize storage client
-            self.client = storage.Client(project=settings.GCS_PROJECT_ID)
+            # Create credentials object from JSON
+            credentials = service_account.Credentials.from_service_account_info(
+                credentials_info
+            )
+
+            # Initialize storage client with credentials
+            self.client = storage.Client(
+                project=settings.GCS_PROJECT_ID,
+                credentials=credentials
+            )
+
             self.original_bucket = self.client.bucket(settings.GCS_ORIGINAL_BUCKET)
             self.thumbnail_bucket = self.client.bucket(settings.GCS_THUMBNAIL_BUCKET)
 
-            logger.info("Google Cloud Storage client initialized")
+            logger.info("Google Cloud Storage client initialized with JSON credentials")
         except Exception as e:
             logger.error(f"Failed to initialize storage client: {e}")
             raise StorageException(str(e))

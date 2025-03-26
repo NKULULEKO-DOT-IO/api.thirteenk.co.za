@@ -18,9 +18,10 @@ class Settings(BaseSettings):
 
     # Google Cloud Storage
     GCS_PROJECT_ID: str
-    GCS_CREDENTIALS_FILE: str
+    GCS_CREDENTIALS_FILE: str = ""
     GCS_ORIGINAL_BUCKET: str
     GCS_THUMBNAIL_BUCKET: str
+    GCS_CREDENTIALS_JSON: str
 
     # Logging
     LOG_LEVEL: str
