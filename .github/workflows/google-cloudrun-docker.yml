@@ -62,6 +62,10 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCS_CREDENTIALS_JSON }}'
 
+      - name: Configure Docker authentication
+        run: gcloud auth configure-docker
+
+
       - name: Create build environment file
         run: |
           echo "API_VERSION=${{ secrets.API_VERSION }}" > .env.build
