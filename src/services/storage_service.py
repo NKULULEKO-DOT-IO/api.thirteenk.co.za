@@ -9,9 +9,9 @@ from google.cloud import storage
 from google.oauth2 import service_account
 from PIL import Image
 
-from app.core.config import get_settings
-from app.core.logging import logger
-from app.core.exceptions import StorageException
+from src.core.config import get_settings
+from src.core.logging import logger
+from src.core.exceptions import StorageException
 
 settings = get_settings()
 
@@ -88,12 +88,21 @@ class StorageService:
 
             # Generate thumbnail using PIL
             image = Image.open(BytesIO(content))
-            image.thumbnail((200, 200))  # Resize to thumbnail size
+
+            # Preserve EXIF orientation
+            if hasattr(image, '_getexif') and image._getexif() is not None:
+                from PIL import ImageOps
+                image = ImageOps.exif_transpose(image)
+
+            # Use larger thumbnail size (1000x1000)
+            image.thumbnail((1000, 1000))
 
             # Save thumbnail to memory
             thumbnail_io = BytesIO()
             image_format = image.format or "JPEG"
-            image.save(thumbnail_io, format=image_format)
+
+            # Preserve any EXIF data when saving
+            image.save(thumbnail_io, format=image_format, exif=getattr(image, 'info', {}).get('exif'))
             thumbnail_io.seek(0)
 
             # Upload thumbnail to storage
@@ -113,7 +122,6 @@ class StorageService:
         except Exception as e:
             logger.error(f"Failed to generate thumbnail: {e}")
             raise StorageException(str(e))
-
     async def delete_image(self, filename: str) -> bool:
         """Delete an image and its thumbnail from storage."""
         try:

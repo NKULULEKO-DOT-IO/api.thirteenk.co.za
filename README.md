@@ -159,41 +159,46 @@ import logging
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConnectionFailure
 
-from app.core.config import settings
+from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class MongoClient:
-    client: AsyncIOMotorClient = None
-    db = None
+   client: AsyncIOMotorClient = None
+   db = None
+
 
 mongo = MongoClient()
 
+
 async def connect_to_mongo():
-    """Create database connection."""
-    logger.info("Connecting to MongoDB...")
-    mongo.client = AsyncIOMotorClient(settings.MONGODB_URL)
-    mongo.db = mongo.client[settings.DATABASE_NAME]
-    
-    # Test connection
-    try:
-        # The ismaster command is cheap and does not require auth
-        await mongo.client.admin.command('ismaster')
-        logger.info("Connected to MongoDB")
-    except ConnectionFailure:
-        logger.error("Failed to connect to MongoDB")
-        raise
+   """Create database connection."""
+   logger.info("Connecting to MongoDB...")
+   mongo.client = AsyncIOMotorClient(settings.MONGODB_URL)
+   mongo.db = mongo.client[settings.DATABASE_NAME]
+
+   # Test connection
+   try:
+      # The ismaster command is cheap and does not require auth
+      await mongo.client.admin.command('ismaster')
+      logger.info("Connected to MongoDB")
+   except ConnectionFailure:
+      logger.error("Failed to connect to MongoDB")
+      raise
+
 
 async def close_mongo_connection():
-    """Close database connection."""
-    logger.info("Closing MongoDB connection...")
-    if mongo.client:
-        mongo.client.close()
-        logger.info("MongoDB connection closed")
+   """Close database connection."""
+   logger.info("Closing MongoDB connection...")
+   if mongo.client:
+      mongo.client.close()
+      logger.info("MongoDB connection closed")
+
 
 def get_database():
-    """Return database instance."""
-    return mongo.db
+   """Return database instance."""
+   return mongo.db
 ```
 
 ### Storage Service
@@ -211,8 +216,8 @@ from google.cloud import storage
 from fastapi import UploadFile
 from PIL import Image, UnidentifiedImageError
 
-from app.core.config import settings
-from app.core.exceptions import StorageError
+from src.core.config import settings
+from src.core.exceptions import StorageError
 
 logger = logging.getLogger(__name__)
 
@@ -222,91 +227,91 @@ bucket = storage_client.bucket(settings.GOOGLE_CLOUD_BUCKET)
 
 
 class StorageService:
-    @staticmethod
-    async def upload_image(file: UploadFile) -> dict:
-        """
-        Upload an image to Google Cloud Storage and generate thumbnail.
-        
-        Args:
-            file (UploadFile): The uploaded image file
-            
-        Returns:
-            dict: URLs for both original image and thumbnail
-        
-        Raises:
-            StorageError: If upload fails or file is not a valid image
-        """
-        try:
-            content = await file.read()
-            
-            # Validate image file
-            try:
-                img = Image.open(io.BytesIO(content))
-                img.verify()  # Verify it's a valid image
-            except UnidentifiedImageError:
-                raise StorageError("Invalid image file")
-            
-            # Generate a unique filename
-            extension = os.path.splitext(file.filename)[1].lower()
-            timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-            unique_id = str(uuid.uuid4())[:8]
-            
-            # Original image path
-            original_filename = f"original/{timestamp}_{unique_id}{extension}"
-            original_blob = bucket.blob(original_filename)
-            
-            # Upload original
-            original_blob.upload_from_string(
-                content,
-                content_type=file.content_type
-            )
-            
-            # Generate and upload thumbnail
-            thumbnail_content = await StorageService.generate_thumbnail(content)
-            thumbnail_filename = f"thumbnails/{timestamp}_{unique_id}{extension}"
-            thumbnail_blob = bucket.blob(thumbnail_filename)
-            thumbnail_blob.upload_from_string(
-                thumbnail_content,
-                content_type=file.content_type
-            )
-            
-            # Return the URLs
-            return {
-                "original_url": original_filename,
-                "thumbnail_url": thumbnail_filename
-            }
-            
-        except Exception as e:
-            logger.error(f"Error uploading image: {str(e)}")
-            raise StorageError(f"Failed to upload image: {str(e)}")
-    
-    @staticmethod
-    async def generate_thumbnail(file_content: bytes) -> bytes:
-        """
-        Generate a thumbnail from image content.
-        
-        Args:
-            file_content (bytes): The original image content
-            
-        Returns:
-            bytes: The thumbnail image content
-        """
-        # Open the image
-        img = Image.open(io.BytesIO(file_content))
-        
-        # Determine thumbnail size while maintaining aspect ratio
-        max_size = (300, 300)
-        img.thumbnail(max_size, Image.LANCZOS)
-        
-        # Save to bytes
-        output = io.BytesIO()
-        if img.mode == 'RGBA':
-            img = img.convert('RGB')
-        
-        img.save(output, format='JPEG', quality=85)
-        output.seek(0)
-        
-        return output.getvalue()
+   @staticmethod
+   async def upload_image(file: UploadFile) -> dict:
+      """
+      Upload an image to Google Cloud Storage and generate thumbnail.
+      
+      Args:
+          file (UploadFile): The uploaded image file
+          
+      Returns:
+          dict: URLs for both original image and thumbnail
+      
+      Raises:
+          StorageError: If upload fails or file is not a valid image
+      """
+      try:
+         content = await file.read()
+
+         # Validate image file
+         try:
+            img = Image.open(io.BytesIO(content))
+            img.verify()  # Verify it's a valid image
+         except UnidentifiedImageError:
+            raise StorageError("Invalid image file")
+
+         # Generate a unique filename
+         extension = os.path.splitext(file.filename)[1].lower()
+         timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+         unique_id = str(uuid.uuid4())[:8]
+
+         # Original image path
+         original_filename = f"original/{timestamp}_{unique_id}{extension}"
+         original_blob = bucket.blob(original_filename)
+
+         # Upload original
+         original_blob.upload_from_string(
+            content,
+            content_type=file.content_type
+         )
+
+         # Generate and upload thumbnail
+         thumbnail_content = await StorageService.generate_thumbnail(content)
+         thumbnail_filename = f"thumbnails/{timestamp}_{unique_id}{extension}"
+         thumbnail_blob = bucket.blob(thumbnail_filename)
+         thumbnail_blob.upload_from_string(
+            thumbnail_content,
+            content_type=file.content_type
+         )
+
+         # Return the URLs
+         return {
+            "original_url": original_filename,
+            "thumbnail_url": thumbnail_filename
+         }
+
+      except Exception as e:
+         logger.error(f"Error uploading image: {str(e)}")
+         raise StorageError(f"Failed to upload image: {str(e)}")
+
+   @staticmethod
+   async def generate_thumbnail(file_content: bytes) -> bytes:
+      """
+      Generate a thumbnail from image content.
+      
+      Args:
+          file_content (bytes): The original image content
+          
+      Returns:
+          bytes: The thumbnail image content
+      """
+      # Open the image
+      img = Image.open(io.BytesIO(file_content))
+
+      # Determine thumbnail size while maintaining aspect ratio
+      max_size = (300, 300)
+      img.thumbnail(max_size, Image.LANCZOS)
+
+      # Save to bytes
+      output = io.BytesIO()
+      if img.mode == 'RGBA':
+         img = img.convert('RGB')
+
+      img.save(output, format='JPEG', quality=85)
+      output.seek(0)
+
+      return output.getvalue()
 ```
 
 ### Image Service
@@ -318,43 +323,43 @@ The Image Service manages image data in the database:
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-from app.db.mongodb import get_database
-from app.schemas.image import ImageCreate, ImageUpdate
+from src.db.mongodb import get_database
+from src.schemas.image import ImageCreate, ImageUpdate
 from bson.objectid import ObjectId
 
 
 class ImageService:
-    @staticmethod
-    async def get_all_images(skip: int = 0, limit: int = 50) -> Dict[str, Any]:
-        """
-        Get all images with pagination.
-        
-        Args:
-            skip (int): Number of records to skip
-            limit (int): Maximum number of records to return
-            
-        Returns:
-            Dict: Images with pagination info
-        """
-        db = get_database()
-        
-        # Get total count
-        total = await db.images.count_documents({})
-        
-        # Get paginated results
-        cursor = db.images.find().sort("upload_date", -1).skip(skip).limit(limit)
-        images = await cursor.to_list(length=limit)
-        
-        # Convert ObjectId to string
-        for image in images:
-            image["id"] = str(image.pop("_id"))
-        
-        return {
-            "images": images,
-            "total": total,
-            "page": skip // limit + 1,
-            "limit": limit
-        }
+   @staticmethod
+   async def get_all_images(skip: int = 0, limit: int = 50) -> Dict[str, Any]:
+      """
+      Get all images with pagination.
+      
+      Args:
+          skip (int): Number of records to skip
+          limit (int): Maximum number of records to return
+          
+      Returns:
+          Dict: Images with pagination info
+      """
+      db = get_database()
+
+      # Get total count
+      total = await db.images.count_documents({})
+
+      # Get paginated results
+      cursor = db.images.find().sort("upload_date", -1).skip(skip).limit(limit)
+      images = await cursor.to_list(length=limit)
+
+      # Convert ObjectId to string
+      for image in images:
+         image["id"] = str(image.pop("_id"))
+
+      return {
+         "images": images,
+         "total": total,
+         "page": skip // limit + 1,
+         "limit": limit
+      }
 ```
 
 ### Download Service
@@ -367,58 +372,58 @@ from datetime import datetime
 from typing import List, Dict, Any
 from fastapi import Request
 
-from app.db.mongodb import get_database
-from app.models.download import DownloadModel
-from app.services.image_service import ImageService
+from src.db.mongodb import get_database
+from src.models.download import DownloadModel
+from src.services.image_service import ImageService
 
 
 class DownloadService:
-    @staticmethod
-    async def record_download(image_id: str, request: Request) -> Dict[str, Any]:
-        """
-        Record a new download and increment the image download counter.
-        
-        Args:
-            image_id (str): ID of the downloaded image
-            request (Request): The HTTP request
-            
-        Returns:
-            Dict: Download record information with signed URL
-        """
-        db = get_database()
-        
-        # Get client information
-        ip_address = request.client.host
-        user_agent = request.headers.get("user-agent", "")
-        
-        # Create download record
-        download_data = {
-            "image_id": image_id,
-            "timestamp": datetime.utcnow(),
-            "ip_address": ip_address,
-            "user_agent": user_agent
-        }
-        
-        # Insert record
-        result = await db.downloads.insert_one(download_data)
-        download_id = str(result.inserted_id)
-        
-        # Increment image download counter
-        await ImageService.increment_download_count(image_id)
-        
-        # Get image details for generating URL
-        image = await ImageService.get_image_by_id(image_id)
-        
-        # Get signed URL for the image
-        from app.services.storage_service import StorageService
-        signed_url = StorageService.get_signed_url(image["original_url"])
-        
-        return {
-            "id": download_id,
-            "image_id": image_id,
-            "timestamp": download_data["timestamp"],
-            "url": signed_url
-        }
+   @staticmethod
+   async def record_download(image_id: str, request: Request) -> Dict[str, Any]:
+      """
+      Record a new download and increment the image download counter.
+      
+      Args:
+          image_id (str): ID of the downloaded image
+          request (Request): The HTTP request
+          
+      Returns:
+          Dict: Download record information with signed URL
+      """
+      db = get_database()
+
+      # Get client information
+      ip_address = request.client.host
+      user_agent = request.headers.get("user-agent", "")
+
+      # Create download record
+      download_data = {
+         "image_id": image_id,
+         "timestamp": datetime.utcnow(),
+         "ip_address": ip_address,
+         "user_agent": user_agent
+      }
+
+      # Insert record
+      result = await db.downloads.insert_one(download_data)
+      download_id = str(result.inserted_id)
+
+      # Increment image download counter
+      await ImageService.increment_download_count(image_id)
+
+      # Get image details for generating URL
+      image = await ImageService.get_image_by_id(image_id)
+
+      # Get signed URL for the image
+      from src.services.storage_service import StorageService
+      signed_url = StorageService.get_signed_url(image["original_url"])
+
+      return {
+         "id": download_id,
+         "image_id": image_id,
+         "timestamp": download_data["timestamp"],
+         "url": signed_url
+      }
 ```
 
 ## Deployment

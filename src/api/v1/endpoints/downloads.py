@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Request
 
-from app.api.deps import get_download_service, get_image_service
-from app.schemas.download import DownloadResponse, DownloadCountResponse
-from app.services.download_service import DownloadService
-from app.services.image_service import ImageService
-from app.core.logging import logger
+from src.api.deps import get_download_service, get_image_service
+from src.schemas.download import DownloadResponse, DownloadCountResponse
+from src.services.download_service import DownloadService
+from src.services.image_service import ImageService
+from src.core.logging import logger
 
 router = APIRouter()
 

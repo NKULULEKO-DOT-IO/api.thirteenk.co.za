@@ -1,5 +1,5 @@
-from app.db.mongodb import get_database
-from app.core.logging import logger
+from src.db.mongodb import get_database
+from src.core.logging import logger
 
 
 async def init_db():

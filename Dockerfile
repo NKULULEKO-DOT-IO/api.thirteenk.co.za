@@ -22,7 +22,7 @@ COPY . .
 RUN mkdir -p /app/secrets
 
 # Copy environment file for build if it exists
-COPY .env.production .env.production
+COPY .env.build .env.build
 
 # Expose port
 EXPOSE 8000

@@ -2,10 +2,10 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 
-from app.api.deps import get_image_service
-from app.schemas.image import ImageCreate, ImageUpdate, ImageResponse, ImagesResponse
-from app.services.image_service import ImageService
-from app.core.logging import logger
+from src.api.deps import get_image_service
+from src.schemas.image import ImageCreate, ImageUpdate, ImageResponse, ImagesResponse
+from src.services.image_service import ImageService
+from src.core.logging import logger
 
 router = APIRouter()
 

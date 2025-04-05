@@ -4,11 +4,11 @@ from typing import List, Optional, Dict, Any
 from bson import ObjectId
 from fastapi import UploadFile
 
-from app.db.mongodb import get_database
-from app.models.image import Image
-from app.services.storage_service import StorageService
-from app.core.logging import logger
-from app.core.exceptions import ImageNotFoundException
+from src.db.mongodb import get_database
+from src.models.image import Image
+from src.services.storage_service import StorageService
+from src.core.logging import logger
+from src.core.exceptions import ImageNotFoundException
 
 
 class ImageService:

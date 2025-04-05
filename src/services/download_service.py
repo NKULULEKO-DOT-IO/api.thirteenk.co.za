@@ -3,9 +3,9 @@ from typing import Dict, Any
 
 from bson import ObjectId
 
-from app.db.mongodb import get_database
-from app.models.download import Download
-from app.core.logging import logger
+from src.db.mongodb import get_database
+from src.models.download import Download
+from src.core.logging import logger
 
 
 class DownloadService:

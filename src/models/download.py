@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from bson import ObjectId
 
-from app.models.image import PyObjectId
+from src.models.image import PyObjectId
 
 
 class Download(BaseModel):

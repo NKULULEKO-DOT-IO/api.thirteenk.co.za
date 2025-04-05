@@ -3,7 +3,7 @@ import sys
 from pydantic import AnyHttpUrl
 from typing import Any, Dict, List, Optional, Union
 
-from app.core.config import get_settings
+from src.core.config import get_settings
 
 settings = get_settings()
 

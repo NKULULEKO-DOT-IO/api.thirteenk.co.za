@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DEBUG: bool
     PROJECT_NAME: str
     SECRET_KEY: str
+    APP_VERSION: str
 
     # MongoDB
     MONGODB_URL: str

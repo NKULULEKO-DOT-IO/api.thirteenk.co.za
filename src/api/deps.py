@@ -2,9 +2,9 @@ from typing import Generator
 
 from fastapi import Depends
 
-from app.services.image_service import ImageService
-from app.services.download_service import DownloadService
-from app.services.storage_service import StorageService
+from src.services.image_service import ImageService
+from src.services.download_service import DownloadService
+from src.services.storage_service import StorageService
 
 
 def get_image_service() -> ImageService:

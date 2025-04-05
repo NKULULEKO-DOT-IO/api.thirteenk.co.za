@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
-from app.core.logging import logger
+from src.core.logging import logger
 
 
 class ImageNotFoundException(HTTPException):
