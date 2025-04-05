@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+motor
+pymongo
+pydantic
+python-multipart
+python-dotenv
+Pillow
+google-cloud-storage
+alembic
+pytest
+httpx
+aiofiles
