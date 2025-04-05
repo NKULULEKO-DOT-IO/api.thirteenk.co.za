@@ -130,6 +130,7 @@ celerybeat.pid
 # Environments
 .env
 .env.production
+.env.build
 deploy.py
 .venv
 gcloud-service-key.json
